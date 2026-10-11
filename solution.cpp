@@ -111,24 +111,31 @@ public:
         return result;
     }
     
+    //转换为天数
+    int toDays() const {
+        int days = 0;
+        
+        //计算整年天数
+        for (int y = 1900; y < _year; y++) {
+            days += isLeapYear(y) ? 366 : 365;
+        }
+        
+        //计算整月天数
+        for (int m = 1; m < _month; m++) {
+            days += getMonthDays(_year, m);
+        }
+        
+        //加上当月天数
+        days += _day - 1;
+        
+        return days;
+    }
+    
     //日期减日期
     int operator-(const Date& other) const {
-        Date d1 = *this;
-        Date d2 = other;
-        int diff = 0;
-        
-        if (d1 < d2) {
-            Date temp = d1;
-            d1 = d2;
-            d2 = temp;
-        }
-        
-        while (d2 < d1) {
-            ++d2;
-            diff++;
-        }
-        
-        return diff;
+        int days1 = this->toDays();
+        int days2 = other.toDays();
+        return days1 > days2 ? days1 - days2 : days2 - days1;
     }
     
     //<重载
