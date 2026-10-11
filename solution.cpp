@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
+#include <cmath>
 using namespace std;
 
 const int month_days[] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -110,25 +111,31 @@ public:
         return result;
     }
     
+    // Convert date to days since 1900-1-1 for efficient calculation
+    int toDays() const {
+        int days = 0;
+        
+        // Add full years
+        for (int y = 1900; y < _year; y++) {
+            days += isLeapYear(y) ? 366 : 365;
+        }
+        
+        // Add full months
+        for (int m = 1; m < _month; m++) {
+            days += getDaysInMonth(_year, m);
+        }
+        
+        // Add days
+        days += _day - 1;  // -1 because 1900-1-1 should be day 0
+        
+        return days;
+    }
+    
     // Date - Date (absolute difference in days)
     int operator-(const Date& other) const {
-        Date d1 = *this;
-        Date d2 = other;
-        int diff = 0;
-        
-        if (d1 < d2) {
-            // Make d1 the later date
-            Date temp = d1;
-            d1 = d2;
-            d2 = temp;
-        }
-        
-        while (d2 < d1) {
-            ++d2;
-            diff++;
-        }
-        
-        return diff;
+        int days1 = this->toDays();
+        int days2 = other.toDays();
+        return abs(days1 - days2);
     }
     
     // Less than comparison operator
