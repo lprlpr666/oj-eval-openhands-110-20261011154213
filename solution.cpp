@@ -25,7 +25,7 @@ private:
     
     //检查日期是否有效
     bool checkDate(int year, int month, int day) const {
-        if (year < 1900 || year > 2030) return false;
+        if (year < 1900) return false;
         if (month < 1 || month > 12) return false;
         if (day < 1 || day > getMonthDays(year, month)) return false;
         return true;
