@@ -140,9 +140,9 @@ public:
     
     // Less than comparison operator
     int operator<(const Date& other) const {
-        if (_year != other._year) return _year < other._year;
-        if (_month != other._month) return _month < other._month;
-        return _day < other._day;
+        if (_year != other._year) return (_year < other._year) ? 1 : 0;
+        if (_month != other._month) return (_month < other._month) ? 1 : 0;
+        return (_day < other._day) ? 1 : 0;
     }
     
     // Output operator friend function
