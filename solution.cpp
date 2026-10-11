@@ -1,11 +1,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
-#include <cmath>
 using namespace std;
-
 const int month_days[] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-
 class Date
 {
 private:
@@ -13,34 +10,37 @@ private:
     int _month;
     int _day;
     
-    // Check if a year is leap year
+    //判断是否为闰年
     bool isLeapYear(int year) const {
         return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
     }
     
-    // Get days in a month for a given year
-    int getDaysInMonth(int year, int month) const {
+    //获取某年某月的天数
+    int getMonthDays(int year, int month) const {
         if (month == 2 && isLeapYear(year)) {
             return 29;
         }
         return month_days[month];
     }
     
-    // Validate if a date exists
-    bool isValidDate(int year, int month, int day) const {
+    //检查日期是否有效
+    bool checkDate(int year, int month, int day) const {
         if (year < 1900 || year > 2030) return false;
         if (month < 1 || month > 12) return false;
-        if (day < 1 || day > getDaysInMonth(year, month)) return false;
+        if (day < 1 || day > getMonthDays(year, month)) return false;
         return true;
     }
     
 public:
-    // Default constructor: 1900-1-1
-    Date() : _year(1900), _month(1), _day(1) {}
+    //构造函数
+    Date() {
+        _year = 1900;
+        _month = 1;
+        _day = 1;
+    }
     
-    // Parameterized constructor with validation
     Date(int yy, int mm, int dd) {
-        if (isValidDate(yy, mm, dd)) {
+        if (checkDate(yy, mm, dd)) {
             _year = yy;
             _month = mm;
             _day = dd;
@@ -51,10 +51,10 @@ public:
         }
     }
     
-    // Pre-increment operator (++d)
+    //前置++
     Date& operator++() {
         _day++;
-        if (_day > getDaysInMonth(_year, _month)) {
+        if (_day > getMonthDays(_year, _month)) {
             _day = 1;
             _month++;
             if (_month > 12) {
@@ -65,14 +65,14 @@ public:
         return *this;
     }
     
-    // Post-increment operator (d++)
+    //后置++
     Date operator++(int) {
         Date temp = *this;
         ++(*this);
         return temp;
     }
     
-    // Pre-decrement operator (--d)
+    //前置--
     Date& operator--() {
         _day--;
         if (_day < 1) {
@@ -81,124 +81,73 @@ public:
                 _month = 12;
                 _year--;
             }
-            _day = getDaysInMonth(_year, _month);
+            _day = getMonthDays(_year, _month);
         }
         return *this;
     }
     
-    // Post-decrement operator (d--)
+    //后置--
     Date operator--(int) {
         Date temp = *this;
         --(*this);
         return temp;
     }
     
-    // Date + int days
+    //一个日期加上一个天数
     Date operator+(int days) const {
         Date result = *this;
-        int total_days = result.toDays() + days;
-        
-        // Convert back to date
-        int year = 1900;
-        while (total_days >= (isLeapYear(year) ? 366 : 365)) {
-            total_days -= (isLeapYear(year) ? 366 : 365);
-            year++;
+        for (int i = 0; i < days; i++) {
+            ++result;
         }
-        
-        int month = 1;
-        while (total_days >= getDaysInMonth(year, month)) {
-            total_days -= getDaysInMonth(year, month);
-            month++;
-        }
-        
-        int day = total_days + 1;
-        
-        result._year = year;
-        result._month = month;
-        result._day = day;
-        
         return result;
     }
     
-    // Date - int days
+    //一个日期减去一个天数
     Date operator-(int days) const {
         Date result = *this;
-        int total_days = result.toDays() - days;
-        
-        // Ensure we don't go before 1900-1-1
-        if (total_days < 0) {
-            result._year = 1900;
-            result._month = 1;
-            result._day = 1;
-            return result;
+        for (int i = 0; i < days; i++) {
+            --result;
         }
-        
-        // Convert back to date
-        int year = 1900;
-        while (total_days >= (isLeapYear(year) ? 366 : 365)) {
-            total_days -= (isLeapYear(year) ? 366 : 365);
-            year++;
-        }
-        
-        int month = 1;
-        while (total_days >= getDaysInMonth(year, month)) {
-            total_days -= getDaysInMonth(year, month);
-            month++;
-        }
-        
-        int day = total_days + 1;
-        
-        result._year = year;
-        result._month = month;
-        result._day = day;
-        
         return result;
     }
     
-    // Convert date to days since 1900-1-1 for efficient calculation
-    int toDays() const {
-        int days = 0;
-        
-        // Add full years
-        for (int y = 1900; y < _year; y++) {
-            days += isLeapYear(y) ? 366 : 365;
-        }
-        
-        // Add full months
-        for (int m = 1; m < _month; m++) {
-            days += getDaysInMonth(_year, m);
-        }
-        
-        // Add days
-        days += _day - 1;  // -1 because 1900-1-1 should be day 0
-        
-        return days;
-    }
-    
-    // Date - Date (absolute difference in days)
+    //日期减日期
     int operator-(const Date& other) const {
-        int days1 = this->toDays();
-        int days2 = other.toDays();
-        return abs(days1 - days2);
+        Date d1 = *this;
+        Date d2 = other;
+        int diff = 0;
+        
+        if (d1 < d2) {
+            Date temp = d1;
+            d1 = d2;
+            d2 = temp;
+        }
+        
+        while (d2 < d1) {
+            ++d2;
+            diff++;
+        }
+        
+        return diff;
     }
     
-    // Less than comparison operator
+    //<重载
     int operator<(const Date& other) const {
         if (_year != other._year) return (_year < other._year) ? 1 : 0;
         if (_month != other._month) return (_month < other._month) ? 1 : 0;
         return (_day < other._day) ? 1 : 0;
     }
     
-    // Output operator friend function
+    //重载输出运算符
     friend ostream& operator<<(ostream& os, const Date& date);
     
-    // Alternative output function (as backup)
+    //备用输出函数
     void out() const {
         cout << _year << "-" << _month << "-" << _day << endl;
     }
 };
 
-// Output operator implementation
+//重载输出运算符
 ostream& operator<<(ostream& os, const Date& date) {
     os << date._year << "-" << date._month << "-" << date._day;
     return os;
@@ -254,7 +203,6 @@ void Test()
         cout << d0 - d1 << endl;
     }
 }
-
 int main()
 {
     Test();
