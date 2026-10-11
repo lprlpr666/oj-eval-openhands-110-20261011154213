@@ -96,18 +96,62 @@ public:
     // Date + int days
     Date operator+(int days) const {
         Date result = *this;
-        for (int i = 0; i < days; i++) {
-            ++result;
+        int total_days = result.toDays() + days;
+        
+        // Convert back to date
+        int year = 1900;
+        while (total_days >= (isLeapYear(year) ? 366 : 365)) {
+            total_days -= (isLeapYear(year) ? 366 : 365);
+            year++;
         }
+        
+        int month = 1;
+        while (total_days >= getDaysInMonth(year, month)) {
+            total_days -= getDaysInMonth(year, month);
+            month++;
+        }
+        
+        int day = total_days + 1;
+        
+        result._year = year;
+        result._month = month;
+        result._day = day;
+        
         return result;
     }
     
     // Date - int days
     Date operator-(int days) const {
         Date result = *this;
-        for (int i = 0; i < days; i++) {
-            --result;
+        int total_days = result.toDays() - days;
+        
+        // Ensure we don't go before 1900-1-1
+        if (total_days < 0) {
+            result._year = 1900;
+            result._month = 1;
+            result._day = 1;
+            return result;
         }
+        
+        // Convert back to date
+        int year = 1900;
+        while (total_days >= (isLeapYear(year) ? 366 : 365)) {
+            total_days -= (isLeapYear(year) ? 366 : 365);
+            year++;
+        }
+        
+        int month = 1;
+        while (total_days >= getDaysInMonth(year, month)) {
+            total_days -= getDaysInMonth(year, month);
+            month++;
+        }
+        
+        int day = total_days + 1;
+        
+        result._year = year;
+        result._month = month;
+        result._day = day;
+        
         return result;
     }
     
